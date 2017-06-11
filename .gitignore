@@ -23,6 +23,7 @@ hs_err_pid*
 
 #Intellij idea:
 *.idea/
+*.gradle/
 *.iml
 *.bin
 *.lock
