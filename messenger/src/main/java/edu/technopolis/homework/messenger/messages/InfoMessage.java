@@ -2,16 +2,26 @@ package edu.technopolis.homework.messenger.messages;
 
 import java.util.Objects;
 
-public class InfoMessage extends Message{
+public class InfoMessage extends Message {
 
     // получить всю информацию о пользователе,
     // без аргументов - о себе
     // (только для залогиненных пользователей)
     private long userId;
 
+    public InfoMessage(long id, long senderId, long userId) {
+        super(id, senderId, Type.MSG_INFO);
+        this.userId = userId;
+    }
+
+    public InfoMessage(long id, long senderId) {
+        this(id, senderId, senderId);
+    }
+
     public long getUserId() {
         return userId;
     }
+
     public void setUserId(long userId) {
         this.userId = userId;
     }
@@ -20,12 +30,12 @@ public class InfoMessage extends Message{
     public boolean equals(Object other) {
         if (this == other)
             return true;
-        if (other == null || getClass() != other.getClass())
+        if (!(other instanceof InfoMessage))
             return false;
         if (!super.equals(other))
             return false;
         InfoMessage info = (InfoMessage) other;
-        return Objects.equals(info, info.userId);
+        return Objects.equals(userId, info.userId);
     }
 
     @Override
@@ -36,6 +46,7 @@ public class InfoMessage extends Message{
     @Override
     public String toString() {
         return "InfoMessage{" +
+                super.toString() + ", " +
                 "userId='" + userId + '\'' +
                 '}';
     }

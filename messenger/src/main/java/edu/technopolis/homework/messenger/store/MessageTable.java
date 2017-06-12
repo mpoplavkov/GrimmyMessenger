@@ -11,7 +11,7 @@ import java.util.List;
 public class MessageTable implements MessageStore {
     private static final String GET_CHATS_BY_USER_ID_QUERY = "SELECT chat_id FROM users_chats WHERE user_id = ?";
     private static final String GET_MESSAGES_FROM_CHAT_QUERY = "SELECT id FROM messages WHERE chat_id = ?";
-    private static final String GET_MESSAGE_BY_ID_QUERY = "SELECT id, sender_id, text FROM messages WHERE id = ?";
+    private static final String GET_MESSAGE_BY_ID_QUERY = "SELECT id, chat_id, sender_id, text FROM messages WHERE id = ?";
     private static final String ADD_MESSAGE_QUERY = "INSERT INTO messages (chat_id, sender_id, text, time) VALUES(?, ?, ?, current_timestamp)";
     private static final String ADD_USER_TO_CHAT = "INSERT INTO users_chats (chat_id, user_id) VALUES(?, ?)";
 
@@ -45,16 +45,16 @@ public class MessageTable implements MessageStore {
         preparedStatement.setLong(1, messageId);
         ResultSet resultSet = preparedStatement.executeQuery();
         if (resultSet.next()) {
-            TextMessage message = new TextMessage(resultSet.getLong("id"), resultSet.getLong("sender_id"), resultSet.getString("text"));
+            TextMessage message = new TextMessage(resultSet.getLong("id"), resultSet.getLong("chat_id"), resultSet.getLong("sender_id"), resultSet.getString("text"));
             return message;
         }
         return null;
     }
 
     @Override
-    public void addMessage(Long chatId, TextMessage message) throws SQLException {
+    public void addMessage(TextMessage message) throws SQLException {
         PreparedStatement preparedStatement = StoreConnection.getConnection().prepareStatement(ADD_MESSAGE_QUERY);
-        preparedStatement.setLong(1, chatId);
+        preparedStatement.setLong(1, message.getChatId());
         preparedStatement.setLong(2, message.getSenderId());
         preparedStatement.setString(3, message.getText());
         preparedStatement.execute();

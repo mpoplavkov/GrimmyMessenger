@@ -9,38 +9,33 @@ public class TextMessage extends Message {
     private long chatId;
     private String text;
 
-    public TextMessage(long id, long sender_id, String text) {
-        this.id = id;
-        this.senderId = sender_id;
+    public TextMessage(long id, long chatId, long senderId, String text) {
+        super(id, senderId, Type.MSG_TEXT);
+        this.chatId = chatId;
         this.text = text;
     }
 
     public String getText() {
         return text;
     }
+
     public long getChatId() {
         return chatId;
     }
+
     public void setText(String text) {
         this.text = text;
     }
+
     public void setChatId(long chatId) {
         this.chatId = chatId;
-    }
-
-    public TextMessage(){}
-
-    public TextMessage(long chatId, String text) {
-        this.chatId = chatId;
-        this.text = text;
     }
 
     @Override
     public boolean equals(Object other) {
         if (this == other)
             return true;
-
-        if (other == null || getClass() != other.getClass())
+        if (!(other instanceof TextMessage))
             return false;
         if (!super.equals(other))
             return false;
@@ -56,8 +51,36 @@ public class TextMessage extends Message {
     @Override
     public String toString() {
         return "TextMessage{" +
-                "chatId='" + chatId + '\'' +
+                super.toString() + ", " +
+                "chatId='" + chatId + "\', " +
                 "text='" + text + '\'' +
                 '}';
     }
+
+    public static void main(String[] args) {
+        String s = "aaa";
+        Object o = new Object();
+        System.out.println(s instanceof Object);
+        System.out.println(s instanceof String);
+        System.out.println(null instanceof String);
+    }
+
+/*    @Override
+    public void writeExternal(ObjectOutput objectOutput) throws IOException {
+        super.writeExternal(objectOutput);
+        objectOutput.writeLong(chatId);
+        byte[] bytes = text.getBytes();
+        objectOutput.writeInt(bytes.length);
+        objectOutput.write(bytes);
+    }
+
+    @Override
+    public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
+        super.readExternal(objectInput);
+        chatId = objectInput.readLong();
+        int n = objectInput.readInt();
+        byte[] bytes = new byte[n];
+        objectInput.read(bytes);
+        text = new String(bytes);
+    }*/
 }

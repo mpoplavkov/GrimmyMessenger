@@ -30,7 +30,7 @@ public interface MessageStore {
     /**
      * Добавить сообщение в чат
      */
-    void addMessage(Long chatId, TextMessage message) throws SQLException;
+    void addMessage(TextMessage message) throws SQLException;
 
     /**
      * Добавить пользователя к чату

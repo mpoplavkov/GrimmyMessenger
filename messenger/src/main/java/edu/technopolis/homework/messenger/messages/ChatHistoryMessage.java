@@ -8,6 +8,11 @@ public class ChatHistoryMessage extends Message{
     // (только для залогиненных пользователей)
     private long chatId;
 
+    public ChatHistoryMessage(long id, long senderId, long chatId) {
+        super(id, senderId, Type.MSG_CHAT_HIST);
+        this.chatId = chatId;
+    }
+
     public long getChatId() {
         return chatId;
     }
@@ -23,6 +28,7 @@ public class ChatHistoryMessage extends Message{
     @Override
     public String toString() {
         return "ChatHistoryMessage{" +
+                super.toString() + ", " +
                 "chatId='" + chatId + '\'' +
                 '}';
     }

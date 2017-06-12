@@ -7,31 +7,37 @@ public class LoginMessage extends Message {
     // залогиниться (если логин не указан, то авторизоваться).
     // В случае успеха приходит вся инфа о пользователе
     private String login;
-    private String password;
+    private int password;
+
+    public LoginMessage(long id, long senderId, String login, String password) {
+        super(id, senderId, Type.MSG_LOGIN);
+        this.login = login;
+        //шифрования пароля будет тут
+        this.password = password.hashCode();
+    }
 
     public String getLogin() {
         return login;
     }
-    public String getPassword() {
+
+    public int getPassword() {
         return password;
     }
+
     public void setLogin(String login) {
         this.login = login;
-    }
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     @Override
     public boolean equals(Object other) {
         if (this == other)
             return true;
-        if (other == null || getClass() != other.getClass())
+        if (!(other instanceof LoginMessage))
             return false;
         if (!super.equals(other))
             return false;
         LoginMessage message = (LoginMessage) other;
-        return Objects.equals(login, message.login);
+        return Objects.equals(login, message.login) && Objects.equals(password, message.password);
     }
 
     @Override
@@ -42,7 +48,8 @@ public class LoginMessage extends Message {
     @Override
     public String toString() {
         return "LoginMessage{" +
-                "login='" + login + '\'' +
+                super.toString() + ", " +
+                "login=" + login + ", " +
                 "password='" + password + '\'' +
                 '}';
     }
