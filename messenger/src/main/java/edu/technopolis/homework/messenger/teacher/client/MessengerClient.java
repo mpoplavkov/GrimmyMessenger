@@ -3,16 +3,14 @@ package edu.technopolis.homework.messenger.teacher.client;
 import edu.technopolis.homework.messenger.messages.*;
 import edu.technopolis.homework.messenger.net.Protocol;
 import edu.technopolis.homework.messenger.net.ProtocolException;
-import edu.technopolis.homework.messenger.net.StringProtocol;
+import edu.technopolis.homework.messenger.net.SerializableProtocol;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Scanner;
-import java.util.Set;
 
 import static java.lang.Long.parseLong;
 
@@ -45,7 +43,7 @@ public class MessengerClient {
         MessengerClient client = new MessengerClient();
         client.setHost("localhost");
         client.setPort(19000);
-        client.setProtocol(new StringProtocol());
+        client.setProtocol(new SerializableProtocol());
 
         try {
             client.initSocket();
@@ -131,6 +129,8 @@ public class MessengerClient {
      * Реагируем на входящее сообщение
      */
     public void onMessage(Message msg) {
+
+        /*
         // FIXME  WHAT THE HELL GOING ON????????
         switch (msg.getType()) {
             case MSG_STATUS:
@@ -151,6 +151,7 @@ public class MessengerClient {
                 System.err.println("Message received:  " + msg);
                 break;
         }
+        */
 
     }
 
@@ -159,6 +160,7 @@ public class MessengerClient {
      * Формат строки можно посмотреть в вики проекта
      */
     public void processInput(String line) throws IOException, ProtocolException {
+        /*
         String[] tokens = line.split(" ");
         System.out.println("Tokens: " + Arrays.toString(tokens));
         String cmdType = tokens[0];
@@ -225,6 +227,7 @@ public class MessengerClient {
             default:
                 System.err.println("Invalid input: " + line);
         }
+        */
     }
 
     /**

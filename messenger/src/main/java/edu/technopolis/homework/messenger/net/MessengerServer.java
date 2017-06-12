@@ -14,7 +14,7 @@ public class MessengerServer {
     public static void main(String[] args) {
         try {
             //Пример серверной обработки
-            Protocol protocol = new StringProtocol();
+            Protocol protocol = new SerializableProtocol();
             ServerSocket serverSocket = new ServerSocket(19000);
             while (true) {
                 Socket client = serverSocket.accept();
