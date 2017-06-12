@@ -1,13 +1,10 @@
 package edu.technopolis.homework.messenger.net;
 
-import org.junit.Test;
+/*import org.junit.Test;
 
 import java.io.IOException;
 import java.net.Socket;
 
-/**
- * Created by timur on 11.05.17.
- */
 public class OldGoodServerTest {
     @Test
     public void test() throws IOException, InterruptedException {
@@ -19,4 +16,4 @@ public class OldGoodServerTest {
         Thread.sleep(100000L);
     }
 
-}
+}*/

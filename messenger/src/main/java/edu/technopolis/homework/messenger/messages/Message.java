@@ -1,11 +1,15 @@
 package edu.technopolis.homework.messenger.messages;
 
+import edu.technopolis.homework.messenger.net.Command;
+import edu.technopolis.homework.messenger.net.CommandException;
+import edu.technopolis.homework.messenger.net.Session;
+
 import java.io.Serializable;
 
 /**
  *
  */
-public abstract class Message implements Serializable {
+public abstract class Message implements Serializable, Command {
 
     protected Long id;
     protected Long senderId;

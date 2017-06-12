@@ -13,6 +13,7 @@ import java.util.Set;
  * Created by timur on 11.05.17.
  */
 public class SkolkovoServer {
+
     private static Map<SocketChannel, ByteBuffer> map = new HashMap<>();
 
     public static void main(String[] args) throws IOException {

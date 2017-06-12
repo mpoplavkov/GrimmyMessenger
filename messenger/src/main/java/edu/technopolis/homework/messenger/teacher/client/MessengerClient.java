@@ -1,20 +1,19 @@
 package edu.technopolis.homework.messenger.teacher.client;
 
-import edu.technopolis.homework.messenger.messages.*;
-import edu.technopolis.homework.messenger.net.Protocol;
-import edu.technopolis.homework.messenger.net.ProtocolException;
-import edu.technopolis.homework.messenger.net.StringProtocol;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Scanner;
-import java.util.Set;
 
-import static java.lang.Long.parseLong;
+import edu.technopolis.homework.messenger.messages.Message;
+import edu.technopolis.homework.messenger.messages.TextMessage;
+import edu.technopolis.homework.messenger.messages.Type;
+import edu.technopolis.homework.messenger.net.Protocol;
+import edu.technopolis.homework.messenger.net.ProtocolException;
+import edu.technopolis.homework.messenger.net.StringProtocol;
 
 
 /**
@@ -30,49 +29,10 @@ public class MessengerClient {
     private String host;
 
     /**
-     * Залогинился или нет
-     */
-    private boolean isLogin = true;
-
-    /**
      * С каждым сокетом связано 2 канала in/out
      */
     private InputStream in;
     private OutputStream out;
-
-    public static void main(String[] args) throws Exception {
-
-        MessengerClient client = new MessengerClient();
-        client.setHost("localhost");
-        client.setPort(19000);
-        client.setProtocol(new StringProtocol());
-
-        try {
-            client.initSocket();
-
-            // Цикл чтения с консоли
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("$");
-            while (true) {
-                String input = scanner.nextLine();
-                if ("q".equals(input)) {
-                    return;
-                }
-                try {
-                    client.processInput(input);
-                } catch (ProtocolException | IOException e) {
-                    System.err.println("Failed to process user input " + e);
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Application failed. " + e);
-        } finally {
-            if (client != null) {
-                // TODO
-//                client.close();
-            }
-        }
-    }
 
     public Protocol getProtocol() {
         return protocol;
@@ -124,6 +84,7 @@ public class MessengerClient {
                 }
             }
         });
+
         socketListenerThread.start();
     }
 
@@ -131,27 +92,7 @@ public class MessengerClient {
      * Реагируем на входящее сообщение
      */
     public void onMessage(Message msg) {
-        // FIXME  WHAT THE HELL GOING ON????????
-        switch (msg.getType()) {
-            case MSG_STATUS:
-                StatusMessage statusMessage = (StatusMessage) msg;
-                if (statusMessage.getStatus()) {
-                    isLogin = true;
-                    System.out.println(statusMessage.getInfo());
-                } else System.err.println(statusMessage.getInfo());
-                break;
-            case MSG_CHAT_HIST_RESULT:
-                ChatHistoryResult chatHistoryResult = (ChatHistoryResult) msg;
-                for (int i = 0; i < chatHistoryResult.getList().size(); i++) {
-                    System.out.println(chatHistoryResult.getList().get(i).getSenderId() + ": " +
-                            chatHistoryResult.getList().get(i).getText());
-                }
-                break;
-            default:
-                System.err.println("Message received:  " + msg);
-                break;
-        }
-
+        System.err.println("Message received:  " + msg);
     }
 
     /**
@@ -164,64 +105,20 @@ public class MessengerClient {
         String cmdType = tokens[0];
         switch (cmdType) {
             case "/login":
-                LoginMessage loginMessage = new LoginMessage();
-                loginMessage.setType(Type.MSG_LOGIN);
-                loginMessage.setLogin(tokens[1]);
-                loginMessage.setPassword(tokens[2]);
-                send(loginMessage);
+                // TODO: реализация
                 break;
             case "/help":
                 // TODO: реализация
                 break;
             case "/text":
-                if (isLogin) {
-                    if (tokens.length > 2) {
-                        TextMessage sendMessage = new TextMessage();
-                        sendMessage.setType(Type.MSG_TEXT);
-                        sendMessage.setChatId(parseLong(tokens[1]));
-                        sendMessage.setText(tokens[2]);
-                        send(sendMessage);
-                    } else System.err.println("Notification: Command = <chatId> <text>");
-                } else System.err.println("Notification: Please login");
+                // FIXME: пример реализации для простого текстового сообщения
+                TextMessage sendMessage = new TextMessage();
+                sendMessage.setType(Type.MSG_TEXT);
+                sendMessage.setText(tokens[1]);
+                send(sendMessage);
                 break;
-            case "/info":
-                if (isLogin) {
-                    InfoMessage infoMessage = new InfoMessage();
-                    infoMessage.setType(Type.MSG_INFO);
-                    // если аргумент<id> есть, то об <id> пользователе
-                    // если нет аргумента<id>, то о себе
-                    if (tokens.length > 1)
-                        infoMessage.setUserId(parseLong(tokens[1]));
-                    send(infoMessage);
-                } else System.err.println("Notification: Please login");
-                break;
-            case "/chat_list":
-                if (isLogin) {
-                    ChatListMessage chatListMessage = new ChatListMessage();
-                    chatListMessage.setType(Type.MSG_CHAT_LIST);
-                    send(chatListMessage);
-                } else System.err.println("Notification: Please login");
-                break;
-            case "/chat_create":
-                if (isLogin && tokens.length > 1) {
-                    ChatCreateMessage chatCreateMessage = new ChatCreateMessage();
-                    chatCreateMessage.setType(Type.MSG_CHAT_CREATE);
-                    Set<Long> list = new HashSet<>();
-                    for (int i = 1; i < tokens.length; i++) {
-                        list.add(parseLong(tokens[i]));
-                    }
-                    chatCreateMessage.setListOfInvited(list);
-                    send(chatCreateMessage);
-                } else System.err.println("Notification: Please login");
-                break;
-            case "/chat_history":
-                if (isLogin && tokens.length > 1) {
-                    ChatHistoryMessage chatHistoryMessage = new ChatHistoryMessage();
-                    chatHistoryMessage.setType(Type.MSG_CHAT_HIST);
-                    chatHistoryMessage.setChatId(parseLong(tokens[1]));
-                    send(chatHistoryMessage);
-                } else System.err.println("Notification: Please login");
-                break;
+            // TODO: implement another types from wiki
+
             default:
                 System.err.println("Invalid input: " + line);
         }
@@ -234,5 +131,39 @@ public class MessengerClient {
         System.out.println(msg);
         out.write(protocol.encode(msg));
         out.flush(); // принудительно проталкиваем буфер с данными
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        MessengerClient client = new MessengerClient();
+        client.setHost("localhost");
+        client.setPort(19000);
+        client.setProtocol(new StringProtocol());
+
+        try {
+            client.initSocket();
+
+            // Цикл чтения с консоли
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("$");
+            while (true) {
+                String input = scanner.nextLine();
+                if ("q".equals(input)) {
+                    return;
+                }
+                try {
+                    client.processInput(input);
+                } catch (ProtocolException | IOException e) {
+                    System.err.println("Failed to process user input " + e);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Application failed. " + e);
+        } finally {
+            if (client != null) {
+                // TODO
+//                client.close();
+            }
+        }
     }
 }

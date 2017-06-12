@@ -30,6 +30,14 @@ public class Session {
     private InputStream in;
     private OutputStream out;
 
+    public Session(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
     public void send(Message msg) throws ProtocolException, IOException {
         // TODO: Отправить клиенту сообщение
     }

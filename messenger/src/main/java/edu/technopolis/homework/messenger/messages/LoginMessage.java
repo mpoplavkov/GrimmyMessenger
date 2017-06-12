@@ -1,5 +1,10 @@
 package edu.technopolis.homework.messenger.messages;
 
+import edu.technopolis.homework.messenger.User;
+import edu.technopolis.homework.messenger.net.CommandException;
+import edu.technopolis.homework.messenger.net.GrimmyServer;
+import edu.technopolis.homework.messenger.net.Session;
+
 import java.util.Objects;
 
 public class LoginMessage extends Message {
@@ -7,19 +12,54 @@ public class LoginMessage extends Message {
     // залогиниться (если логин не указан, то авторизоваться).
     // В случае успеха приходит вся инфа о пользователе
     private String login;
-    private String password;
+    private int password;
+
+    public LoginMessage() {}
+
+    public LoginMessage(String login, int password) {
+        this.login = login;
+        this.password = password;
+        this.type = Type.MSG_LOGIN;
+    }
 
     public String getLogin() {
         return login;
     }
-    public String getPassword() {
+    public int getPassword() {
         return password;
     }
     public void setLogin(String login) {
         this.login = login;
     }
-    public void setPassword(String password) {
+    public void setPassword(int password) {
         this.password = password;
+    }
+
+    @Override
+    public void execute(Session session, GrimmyServer server) throws CommandException {
+        //Нужно залогинить пользователя
+
+        //Проверяем, авторизировался ли такой пользователь
+        boolean isUserExists = false;
+        for(User user : server.getUsers()) {
+            if(user.getLogin().equals(login)) {
+                isUserExists = true;
+                break;
+            }
+        }
+
+        if(isUserExists) {
+            server.getLoggedInUsers().add(session.getUser());
+        }
+
+        //пользователь успешно залогирован, теперь нужно отправить на клиент подтверждение:
+        //MSG_INFO_RESULT
+
+
+
+
+
+
     }
 
     @Override
