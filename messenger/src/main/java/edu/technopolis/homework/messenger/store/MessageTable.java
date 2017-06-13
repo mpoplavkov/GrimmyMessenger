@@ -10,10 +10,11 @@ import java.util.List;
 
 public class MessageTable implements MessageStore {
     private static final String GET_CHATS_BY_USER_ID_QUERY = "SELECT chat_id FROM users_chats WHERE user_id = ?";
-    private static final String GET_MESSAGES_FROM_CHAT_QUERY = "SELECT id FROM messages WHERE chat_id = ?";
+    private static final String GET_MESSAGES_FROM_CHAT_QUERY = "SELECT id FROM messages WHERE chat_id = ? ORDER BY time DESC LIMIT 10";
     private static final String GET_MESSAGE_BY_ID_QUERY = "SELECT id, chat_id, sender_id, text FROM messages WHERE id = ?";
     private static final String ADD_MESSAGE_QUERY = "INSERT INTO messages (chat_id, sender_id, text, time) VALUES(?, ?, ?, current_timestamp)";
-    private static final String ADD_USER_TO_CHAT = "INSERT INTO users_chats (chat_id, user_id) VALUES(?, ?)";
+    private static final String ADD_USER_TO_CHAT_QUERY = "INSERT INTO users_chats (chat_id, user_id) VALUES(?, ?)";
+    private static final String CREATE_CHAT_QUERY = "INSERT INTO chats (name) VALUES(?) RETURNING id";
 
     @Override
     public List<Long> getChatsByUserId(Long userId) throws SQLException {
@@ -62,9 +63,20 @@ public class MessageTable implements MessageStore {
 
     @Override
     public void addUserToChat(Long userId, Long chatId) throws SQLException {
-        PreparedStatement preparedStatement = StoreConnection.getConnection().prepareStatement(ADD_USER_TO_CHAT);
+        PreparedStatement preparedStatement = StoreConnection.getConnection().prepareStatement(ADD_USER_TO_CHAT_QUERY);
         preparedStatement.setLong(1, chatId);
         preparedStatement.setLong(2, userId);
         preparedStatement.execute();
+    }
+
+    @Override
+    public long createChat(String name) throws SQLException {
+        PreparedStatement preparedStatement = StoreConnection.getConnection().prepareStatement(CREATE_CHAT_QUERY);
+        preparedStatement.setString(1, name);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        if (resultSet.next()) {
+            return resultSet.getLong("id");
+        }
+        return 0;
     }
 }

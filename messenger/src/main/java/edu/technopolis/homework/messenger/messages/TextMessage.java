@@ -15,6 +15,12 @@ public class TextMessage extends Message {
         this.text = text;
     }
 
+    public TextMessage(long senderId, long chatId, String text) {
+        super(senderId, Type.MSG_TEXT);
+        this.chatId = chatId;
+        this.text = text;
+    }
+
     public String getText() {
         return text;
     }

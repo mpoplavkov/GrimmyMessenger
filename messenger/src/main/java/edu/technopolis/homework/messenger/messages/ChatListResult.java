@@ -6,8 +6,8 @@ import java.util.Objects;
 public class ChatListResult extends Message {
     private List<Long> chats;
 
-    public ChatListResult(long id, long senderId, List<Long> chats) {
-        super(id, senderId, Type.MSG_CHAT_LIST_RESULT);
+    public ChatListResult(List<Long> chats) {
+        super(0, Type.MSG_CHAT_LIST_RESULT);
         this.chats = chats;
     }
 

@@ -3,11 +3,13 @@ package edu.technopolis.homework.messenger.messages;
 import java.util.Objects;
 
 public class InfoResult extends Message{
+    private long userId;
     private String login;
     private String about;
 
-    public InfoResult(long id, long senderId, String login, String about) {
-        super(id, senderId, Type.MSG_INFO_RESULT);
+    public InfoResult(long userId, String login, String about) {
+        super(0, Type.MSG_INFO_RESULT);
+        this.userId = userId;
         this.login = login;
         this.about = about;
     }
@@ -18,6 +20,10 @@ public class InfoResult extends Message{
 
     public String getAbout() {
         return about;
+    }
+
+    public long getUserId() {
+        return userId;
     }
 
     @Override

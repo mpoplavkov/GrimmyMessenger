@@ -1,6 +1,11 @@
 package edu.technopolis.homework.messenger.net;
 
-import edu.technopolis.homework.messenger.messages.Message;
+import edu.technopolis.homework.messenger.User;
+import edu.technopolis.homework.messenger.messages.*;
+import edu.technopolis.homework.messenger.store.MessageStore;
+import edu.technopolis.homework.messenger.store.MessageTable;
+import edu.technopolis.homework.messenger.store.UserStore;
+import edu.technopolis.homework.messenger.store.UserTable;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -10,17 +15,22 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.sql.SQLException;
 import java.util.*;
 
 public class GrimmyServer {
     private static final int PORT = 10013;
     private static final int BUFFER_SIZE = 1024;
+
     private Protocol protocol = new SerializableProtocol();
     private Map<SocketChannel, ByteBuffer> map = new HashMap<>();
 
+    private UserStore userStore = new UserTable();
+    private MessageStore messageStore = new MessageTable();
+
     public void run() {
-        try(ServerSocketChannel open = openChannel();
-            Selector selector = Selector.open()) {
+        try (ServerSocketChannel open = openChannel();
+             Selector selector = Selector.open()) {
             open.register(selector, SelectionKey.OP_ACCEPT);
             while (true) {
                 selector.select(); //blocking
@@ -45,15 +55,23 @@ public class GrimmyServer {
         }
     }
 
-    private void write(SelectionKey key) {
-        SocketChannel channel = (SocketChannel) key.channel();
-        ByteBuffer buffer = map.get(channel);
+    private static ServerSocketChannel openChannel() throws IOException {
+        ServerSocketChannel open = ServerSocketChannel.open();
+        open.bind(new InetSocketAddress(PORT));
+        open.configureBlocking(false);
+        return open;
+    }
+
+    private void accept(SelectionKey key) {
+        ServerSocketChannel channel = (ServerSocketChannel) key.channel();
         try {
-            channel.write(buffer);
-            buffer.compact();
-            key.interestOps(SelectionKey.OP_READ);
+            SocketChannel accept = channel.accept(); //non-blocking
+            accept.configureBlocking(false);
+            //в чем разница между allocate() и allocateDirect()???
+            map.put(accept, ByteBuffer.allocate(BUFFER_SIZE));
+            accept.register(key.selector(), SelectionKey.OP_READ);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -65,17 +83,9 @@ public class GrimmyServer {
             if (read == -1) {
                 close(channel);
             } else if (read > 0) {
-                buffer.flip();
-                //Не знаю, как еще получить готовый массив байт из буффера
-                //Как варик, можно каждый раз создавать новый буффер методом ByteBuffer.wrap(), как реализовано ниже.
-                //В таком случае в буффере не будет "пустых" байт
-                byte[] bytes = new byte[buffer.limit() - buffer.position()];
-                for (int i = 0; i < bytes.length; i++) {
-                    bytes[i] = buffer.get();
-                }
-                Message message = protocol.decode(bytes);
+                Message message = protocol.decode(buffer);
                 Message newMessage = processMessage(message);
-                map.put(channel, ByteBuffer.wrap(protocol.encode(newMessage)));
+                protocol.encode(newMessage, buffer);
                 key.interestOps(SelectionKey.OP_WRITE);
             }
         } catch (Exception e) {
@@ -83,8 +93,73 @@ public class GrimmyServer {
         }
     }
 
+    private void write(SelectionKey key) {
+        SocketChannel channel = (SocketChannel) key.channel();
+        ByteBuffer buffer = map.get(channel);
+        try {
+            //перед тем как отправлять буфер, его надо перевести в режим чтения!!!
+            buffer.flip();
+            channel.write(buffer);
+            buffer.compact();
+            key.interestOps(SelectionKey.OP_READ);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private Message processMessage(Message message) {
-        return message;
+        User user;
+        String info;
+        try {
+            switch (message.getType()) {
+                case MSG_INFO:
+                    InfoMessage infoMessage = (InfoMessage) message;
+                    user = userStore.getUserById(infoMessage.getUserId());
+                    return new InfoResult(user.getId(), user.getLogin(), user.getAbout());
+                case MSG_TEXT:
+                    TextMessage textMessage = (TextMessage) message;
+                    messageStore.addMessage(textMessage);
+
+                    info = "Sent message to user№" + textMessage.getSenderId() + ": " +
+                            (textMessage.getText().length() > 20 ?
+                                    (textMessage.getText().substring(0, 20) + "...")
+                                    : textMessage.getText());
+                    return new StatusMessage(true, info);
+                case MSG_LOGIN:
+                    LoginMessage loginMessage = (LoginMessage) message;
+                    user = userStore.getUser(loginMessage.getLogin(), loginMessage.getPassword());
+                    info = "id=" + user.getId() + " login=" + user.getLogin();
+                    return new StatusMessage(true, info);
+                case MSG_CHAT_CREATE:
+                    ChatCreateMessage chatCreateMessage = (ChatCreateMessage) message;
+                    //Можно это будет потом заменить на хранимую процедуру в БД, чтоб
+                    //выполнялось за одну операцию
+                    long chatId = messageStore.createChat(chatCreateMessage.getName());
+                    messageStore.addUserToChat(message.getSenderId(), chatId);
+                    for (Long userId : chatCreateMessage.getListOfInvited()) {
+                        messageStore.addUserToChat(userId, chatId);
+                    }
+                    info = "Created chat with chatId=" + chatId + " and name=" + chatCreateMessage.getName();
+                    return new StatusMessage(true, info);
+                case MSG_CHAT_HIST:
+                    ChatHistoryMessage chatHistoryMessage = (ChatHistoryMessage) message;
+                    List<Long> messageIds = messageStore.getMessagesFromChat(chatHistoryMessage.getChatId());
+                    List<TextMessage> messages = new ArrayList<>(messageIds.size());
+                    for (int i = messageIds.size() - 1; i >= 0; i--) {
+                        messages.add((TextMessage) messageStore.getMessageById(messageIds.get(i)));
+                    }
+                    return new ChatHistoryResult(messages);
+                case MSG_CHAT_LIST:
+                    ChatListMessage chatListMessage = (ChatListMessage) message;
+                    return new ChatListResult(messageStore.getChatsByUserId(chatListMessage.getSenderId()));
+                default:
+                    System.out.println("Oh no! It's very bad. I should not have received this message: " + message);
+                    System.exit(0);
+            }
+        } catch (SQLException e) {
+            return new StatusMessage(false, e.getMessage());
+        }
+        return null;
     }
 
     private void close(SocketChannel sc) {
@@ -93,26 +168,6 @@ public class GrimmyServer {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-    }
-
-    private void accept(SelectionKey key) {
-        ServerSocketChannel channel = (ServerSocketChannel) key.channel();
-        try {
-            SocketChannel accept = channel.accept(); //non-blocking
-            accept.configureBlocking(false);
-            //в чем разница между allocate() и allocateDirect()???
-            map.put(accept, ByteBuffer.allocateDirect(BUFFER_SIZE));
-            accept.register(key.selector(), SelectionKey.OP_READ);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private static ServerSocketChannel openChannel() throws IOException {
-        ServerSocketChannel open = ServerSocketChannel.open();
-        open.bind(new InetSocketAddress(PORT));
-        open.configureBlocking(false);
-        return open;
     }
 
     public static void main(String[] args) {

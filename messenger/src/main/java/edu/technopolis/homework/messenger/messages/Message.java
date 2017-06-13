@@ -16,11 +16,16 @@ public abstract class Message implements Serializable {
     private long id;
     private long senderId;
     private Type type;
+    private static long idCounter = 0;
 
     protected Message(long id, long senderId, Type type) {
         this.id = id;
         this.senderId = senderId;
         this.type = type;
+    }
+
+    protected Message(long senderId, Type type) {
+        this(idCounter++, senderId, type);
     }
 
     public long getId() {

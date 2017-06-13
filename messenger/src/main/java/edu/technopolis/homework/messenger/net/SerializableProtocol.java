@@ -6,13 +6,20 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 public class SerializableProtocol implements Protocol {
     @Override
-    public Message decode(byte[] bytes) throws ProtocolException {
+    public Message decode(ByteBuffer byteBuffer) throws ProtocolException {
         Message message;
+        byte[] bytes = new byte[byteBuffer.position()];
+        byteBuffer.flip();
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = byteBuffer.get();
+        }
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        try (ObjectInputStream ois = new ObjectInputStream( bais)) {
+        try (ObjectInputStream ois = new ObjectInputStream(bais)) {
             message = (Message)ois.readObject();
             bais.close();
         } catch (Exception e) {
@@ -22,7 +29,7 @@ public class SerializableProtocol implements Protocol {
     }
 
     @Override
-    public byte[] encode(Message msg) throws ProtocolException {
+    public void encode(Message msg, ByteBuffer byteBuffer) throws ProtocolException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
             oos.writeObject(msg);
@@ -30,6 +37,7 @@ public class SerializableProtocol implements Protocol {
         } catch (Exception e) {
             throw new ProtocolException(e);
         }
-        return baos.toByteArray();
+        byteBuffer.clear();
+        byteBuffer.put(baos.toByteArray());
     }
 }

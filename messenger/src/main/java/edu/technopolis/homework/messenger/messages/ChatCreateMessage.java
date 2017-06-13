@@ -6,15 +6,22 @@ import java.util.Set;
 
 public class ChatCreateMessage extends Message {
     private Set<Long> listOfInvited;
+    private String name;
 
     // создать новый чат,
     // список пользователей приглашенных в чат
     // (только для залогиненных пользователей).
 
-    public ChatCreateMessage(long id, long senderId, Set<Long> listOfInvited) {
-        super(id, senderId, Type.MSG_CHAT_CREATE);
+    public ChatCreateMessage(long senderId, String name, Set<Long> listOfInvited) {
+        super(senderId, Type.MSG_CHAT_CREATE);
         this.listOfInvited = listOfInvited;
+        this.name = name;
     }
+
+    public ChatCreateMessage(long senderId, Set<Long> listOfInvited) {
+        this(senderId, null, listOfInvited);
+    }
+
 
     public Set<Long> getListOfInvited() {
         return listOfInvited;
@@ -22,6 +29,10 @@ public class ChatCreateMessage extends Message {
 
     public void setListOfInvited(Set<Long> listOfInvited) {
         this.listOfInvited = listOfInvited;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -50,6 +61,7 @@ public class ChatCreateMessage extends Message {
             result.append(id);
             result.append(", ");
         }
+        result.delete(result.length() - 2, result.length());
         result.append("}");
         return result.toString();
     }

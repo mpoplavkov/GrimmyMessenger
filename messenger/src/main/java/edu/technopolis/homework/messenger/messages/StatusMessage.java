@@ -7,8 +7,8 @@ public class StatusMessage extends Message {
     private boolean status;
     private String info;
 
-    public StatusMessage(long id, long senderId, boolean status, String info) {
-        super(id, senderId, Type.MSG_STATUS);
+    public StatusMessage(boolean status, String info) {
+        super(0, Type.MSG_STATUS);
         this.status = status;
         this.info = info;
     }

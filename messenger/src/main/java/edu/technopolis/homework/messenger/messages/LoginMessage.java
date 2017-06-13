@@ -9,11 +9,14 @@ public class LoginMessage extends Message {
     private String login;
     private int password;
 
-    public LoginMessage(long id, long senderId, String login, String password) {
-        super(id, senderId, Type.MSG_LOGIN);
+    public LoginMessage(long senderId, String login, String password) {
+        super(senderId, Type.MSG_LOGIN);
         this.login = login;
         //шифрования пароля будет тут
         this.password = password.hashCode();
+    }
+    public LoginMessage(String login, String password) {
+        this(0, login, password);
     }
 
     public String getLogin() {

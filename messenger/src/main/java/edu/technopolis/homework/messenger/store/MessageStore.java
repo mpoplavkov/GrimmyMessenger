@@ -37,4 +37,6 @@ public interface MessageStore {
      */
     void addUserToChat(Long userId, Long chatId) throws SQLException;
 
+    long createChat(String name) throws SQLException;
+
 }

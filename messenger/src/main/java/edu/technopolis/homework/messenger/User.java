@@ -6,17 +6,16 @@ package edu.technopolis.homework.messenger;
 public class User {
     private long id;
     private String login;
-    private int password;
+    private String about;
 
-    public User(long id, String login, int password) {
+    public User(long id, String login, String about) {
         this.id = id;
         this.login = login;
-        this.password = password;
+        this.about = about;
     }
 
-    public User(String login, int password) {
-        this.login = login;
-        this.password = password;
+    public User(long id, String login) {
+        this(id, login, null);
     }
 
     public long getId() {
@@ -27,20 +26,20 @@ public class User {
         return login;
     }
 
-    public int getPassword() {
-        return password;
-    }
-
     public void setLogin(String login) {
         this.login = login;
     }
 
-    public void setPassword(int password) {
-        this.password = password;
+    public String getAbout() {
+        return about;
+    }
+
+    public void setAbout(String about) {
+        this.about = about;
     }
 
     @Override
     public String toString() {
-        return id == 0 ? "I'm not in DB" : id + ": " + login + " (" + password + ")";
+        return id == 0 ? "I'm not in DB" : id + ": " + login;
     }
 }

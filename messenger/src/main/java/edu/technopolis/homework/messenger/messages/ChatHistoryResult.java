@@ -7,8 +7,8 @@ import java.util.Objects;
 public class ChatHistoryResult extends Message {
     private List<TextMessage> messages;
 
-    public ChatHistoryResult(long id, long senderId, List<TextMessage> messages) {
-        super(id, senderId, Type.MSG_CHAT_HIST_RESULT);
+    public ChatHistoryResult(List<TextMessage> messages) {
+        super(0, Type.MSG_CHAT_HIST_RESULT);
         this.messages = messages;
     }
 

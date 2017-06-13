@@ -9,13 +9,13 @@ public class InfoMessage extends Message {
     // (только для залогиненных пользователей)
     private long userId;
 
-    public InfoMessage(long id, long senderId, long userId) {
-        super(id, senderId, Type.MSG_INFO);
+    public InfoMessage(long senderId, long userId) {
+        super(senderId, Type.MSG_INFO);
         this.userId = userId;
     }
 
-    public InfoMessage(long id, long senderId) {
-        this(id, senderId, senderId);
+    public InfoMessage(long senderId) {
+        this(senderId, senderId);
     }
 
     public long getUserId() {

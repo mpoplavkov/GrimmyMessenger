@@ -8,8 +8,8 @@ public class ChatHistoryMessage extends Message{
     // (только для залогиненных пользователей)
     private long chatId;
 
-    public ChatHistoryMessage(long id, long senderId, long chatId) {
-        super(id, senderId, Type.MSG_CHAT_HIST);
+    public ChatHistoryMessage(long senderId, long chatId) {
+        super(senderId, Type.MSG_CHAT_HIST);
         this.chatId = chatId;
     }
 

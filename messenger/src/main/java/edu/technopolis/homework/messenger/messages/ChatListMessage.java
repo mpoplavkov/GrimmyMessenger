@@ -9,8 +9,8 @@ public class ChatListMessage extends Message {
     // (только для залогиненных пользователей).
     // От сервера приходит список id чатов
 
-    public ChatListMessage(long id, long senderId) {
-        super(id, senderId, Type.MSG_CHAT_LIST);
+    public ChatListMessage(long senderId) {
+        super(senderId, Type.MSG_CHAT_LIST);
     }
 
     @Override
