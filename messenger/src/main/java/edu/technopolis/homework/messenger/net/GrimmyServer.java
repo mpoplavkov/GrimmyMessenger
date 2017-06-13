@@ -1,21 +1,24 @@
 package edu.technopolis.homework.messenger.net;
 
+import edu.technopolis.homework.messenger.messages.Message;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.*;
 
-/**
- * Created by timur on 11.05.17.
- */
-public class SkolkovoServer {
-    private static Map<SocketChannel, ByteBuffer> map = new HashMap<>();
+public class GrimmyServer {
+    private static final int PORT = 10013;
+    private static final int BUFFER_SIZE = 1024;
+    private Protocol protocol = new SerializableProtocol();
+    private Map<SocketChannel, ByteBuffer> map = new HashMap<>();
 
-    public static void main(String[] args) throws IOException {
+    public void run() {
         try(ServerSocketChannel open = openChannel();
             Selector selector = Selector.open()) {
             open.register(selector, SelectionKey.OP_ACCEPT);
@@ -42,7 +45,7 @@ public class SkolkovoServer {
         }
     }
 
-    private static void write(SelectionKey key) {
+    private void write(SelectionKey key) {
         SocketChannel channel = (SocketChannel) key.channel();
         ByteBuffer buffer = map.get(channel);
         try {
@@ -54,7 +57,7 @@ public class SkolkovoServer {
         }
     }
 
-    private static void read(SelectionKey key) {
+    private void read(SelectionKey key) {
         SocketChannel channel = (SocketChannel) key.channel();
         try {
             ByteBuffer buffer = map.get(channel);
@@ -63,15 +66,28 @@ public class SkolkovoServer {
                 close(channel);
             } else if (read > 0) {
                 buffer.flip();
-                doMagic(buffer);
+                //Не знаю, как еще получить готовый массив байт из буффера
+                //Как варик, можно каждый раз создавать новый буффер методом ByteBuffer.wrap(), как реализовано ниже.
+                //В таком случае в буффере не будет "пустых" байт
+                byte[] bytes = new byte[buffer.limit() - buffer.position()];
+                for (int i = 0; i < bytes.length; i++) {
+                    bytes[i] = buffer.get();
+                }
+                Message message = protocol.decode(bytes);
+                Message newMessage = processMessage(message);
+                map.put(channel, ByteBuffer.wrap(protocol.encode(newMessage)));
                 key.interestOps(SelectionKey.OP_WRITE);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void close(SocketChannel sc) {
+    private Message processMessage(Message message) {
+        return message;
+    }
+
+    private void close(SocketChannel sc) {
         try {
             sc.close();
         } catch (IOException e1) {
@@ -79,22 +95,13 @@ public class SkolkovoServer {
         }
     }
 
-    private static int doMagic(int data) {
-        return Character.isLetter(data) ? data ^ ' ' : data;
-    }
-
-    private static void doMagic(ByteBuffer data) {
-        for (int i = data.position(); i < data.limit(); i++) {
-            data.put(i, (byte) doMagic(data.get(i)));
-        }
-    }
-
-    private static void accept(SelectionKey key) {
+    private void accept(SelectionKey key) {
         ServerSocketChannel channel = (ServerSocketChannel) key.channel();
         try {
             SocketChannel accept = channel.accept(); //non-blocking
             accept.configureBlocking(false);
-            map.put(accept, ByteBuffer.allocateDirect(1024));
+            //в чем разница между allocate() и allocateDirect()???
+            map.put(accept, ByteBuffer.allocateDirect(BUFFER_SIZE));
             accept.register(key.selector(), SelectionKey.OP_READ);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -103,8 +110,12 @@ public class SkolkovoServer {
 
     private static ServerSocketChannel openChannel() throws IOException {
         ServerSocketChannel open = ServerSocketChannel.open();
-        open.bind(new InetSocketAddress(10013));
+        open.bind(new InetSocketAddress(PORT));
         open.configureBlocking(false);
         return open;
+    }
+
+    public static void main(String[] args) {
+        new GrimmyServer().run();
     }
 }

@@ -9,7 +9,7 @@ public class TextMessage extends Message {
     private long chatId;
     private String text;
 
-    public TextMessage(long id, long chatId, long senderId, String text) {
+    public TextMessage(long id, long senderId, long chatId, String text) {
         super(id, senderId, Type.MSG_TEXT);
         this.chatId = chatId;
         this.text = text;
