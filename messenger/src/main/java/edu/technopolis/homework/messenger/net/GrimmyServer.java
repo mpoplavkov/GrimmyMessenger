@@ -2,10 +2,7 @@ package edu.technopolis.homework.messenger.net;
 
 import edu.technopolis.homework.messenger.User;
 import edu.technopolis.homework.messenger.messages.*;
-import edu.technopolis.homework.messenger.store.MessageStore;
-import edu.technopolis.homework.messenger.store.MessageTable;
-import edu.technopolis.homework.messenger.store.UserStore;
-import edu.technopolis.homework.messenger.store.UserTable;
+import edu.technopolis.homework.messenger.store.*;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -29,6 +26,8 @@ public class GrimmyServer {
     private MessageStore messageStore = new MessageTable();
 
     public void run() {
+        //отсоединение от БД в конце работы
+        Runtime.getRuntime().addShutdownHook(new Thread(StoreConnection::disconnect));
         try (ServerSocketChannel open = openChannel();
              Selector selector = Selector.open()) {
             open.register(selector, SelectionKey.OP_ACCEPT);
@@ -134,20 +133,13 @@ public class GrimmyServer {
                     ChatCreateMessage chatCreateMessage = (ChatCreateMessage) message;
                     //Можно это будет потом заменить на хранимую процедуру в БД, чтоб
                     //выполнялось за одну операцию
-                    long chatId = messageStore.createChat(chatCreateMessage.getName());
-                    messageStore.addUserToChat(message.getSenderId(), chatId);
-                    for (Long userId : chatCreateMessage.getListOfInvited()) {
-                        messageStore.addUserToChat(userId, chatId);
-                    }
-                    info = "Created chat with chatId=" + chatId + " and name=" + chatCreateMessage.getName();
+                    chatCreateMessage.getListOfInvited().add(chatCreateMessage.getSenderId());
+                    long chatId = messageStore.createChat(chatCreateMessage.getName(), chatCreateMessage.getListOfInvited());
+                    info = "Returned chat with chatId=" + chatId;
                     return new StatusMessage(true, info);
                 case MSG_CHAT_HIST:
                     ChatHistoryMessage chatHistoryMessage = (ChatHistoryMessage) message;
-                    List<Long> messageIds = messageStore.getMessagesFromChat(chatHistoryMessage.getChatId());
-                    List<TextMessage> messages = new ArrayList<>(messageIds.size());
-                    for (int i = messageIds.size() - 1; i >= 0; i--) {
-                        messages.add((TextMessage) messageStore.getMessageById(messageIds.get(i)));
-                    }
+                    List<TextMessage> messages = messageStore.getMessagesFromChat(chatHistoryMessage.getSenderId(), chatHistoryMessage.getChatId());
                     return new ChatHistoryResult(messages);
                 case MSG_CHAT_LIST:
                     ChatListMessage chatListMessage = (ChatListMessage) message;

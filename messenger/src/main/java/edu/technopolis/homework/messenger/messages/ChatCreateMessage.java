@@ -56,6 +56,8 @@ public class ChatCreateMessage extends Message {
     public String toString() {
         StringBuilder result = new StringBuilder("ChatCreateMessage{");
         result.append(super.toString());
+        result.append(", name=");
+        result.append(name);
         result.append(", InvitedUsers{");
         for (long id : listOfInvited) {
             result.append(id);

@@ -21,7 +21,7 @@ public class StoreConnection {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            System.out.println("Disconnection successful");
+            System.out.println("Store: disconnection successful");
         }
     }
 
@@ -33,7 +33,7 @@ public class StoreConnection {
             Class.forName("org.postgresql.Driver");
             System.out.println("JDBC driver connected");
             connection = DriverManager.getConnection(url, name, pass);
-            System.out.println("Connection successful");
+            System.out.println("Store: connection successful");
 
         } catch (Exception ex) {
             ex.printStackTrace();

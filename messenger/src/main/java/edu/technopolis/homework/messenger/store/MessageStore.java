@@ -2,6 +2,7 @@ package edu.technopolis.homework.messenger.store;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 import edu.technopolis.homework.messenger.messages.Message;
 import edu.technopolis.homework.messenger.messages.TextMessage;
@@ -20,7 +21,7 @@ public interface MessageStore {
     /**
      * Список сообщений из чата
      */
-    List<Long> getMessagesFromChat(Long chatId) throws SQLException;
+    List<TextMessage> getMessagesFromChat(Long senderId, Long chatId) throws SQLException;
 
     /**
      * Получить информацию о сообщении
@@ -37,6 +38,9 @@ public interface MessageStore {
      */
     void addUserToChat(Long userId, Long chatId) throws SQLException;
 
-    long createChat(String name) throws SQLException;
+    /**
+     * Создать чат с заданными пользователями
+     */
+    long createChat(String name, Set<Long> users) throws SQLException;
 
 }

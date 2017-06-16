@@ -164,12 +164,12 @@ public class GrimmyClient {
                 break;
             case "/help":
                 System.out.println("" +
-                        "/login <login> <password>      - вход в систему.\n" +
-                        "/text <chatId> <message>       - отправить сообщение message в указанный чат.\n" +
-                        "/info [userId]                 - получить информацию о себе (если id не указан) или о пользователе с id = userId.\n" +
-                        "/chat_list                     - получить список чатов пользователя.\n" +
-                        "/chat_create <userId list>     - создать чат или вернуть существующий, если указан один userId. <userId list> - <userId,userId,userId...>\n" +
-                        "/chat_history <chat_id>        - получить список сообщений из указанного чата.");
+                        "/login <login> <password>              - вход в систему.\n" +
+                        "/text <chatId> <message>               - отправить сообщение message в указанный чат.\n" +
+                        "/info [userId]                         - получить информацию о себе (если id не указан) или о пользователе с id = userId.\n" +
+                        "/chat_list                             - получить список чатов пользователя.\n" +
+                        "/chat_create [name] <userId list>      - создать чат или вернуть существующий, если указан один userId. <userId list> - <userId,userId,userId...>\n" +
+                        "/chat_history <chat_id>                - получить список сообщений из указанного чата.");
                 return null;
             case "/text":
                 if (user != null) {
@@ -215,6 +215,12 @@ public class GrimmyClient {
                         Set<Long> users = parseLongList(tokens[1]);
                         if (users != null) {
                             return new ChatCreateMessage(user.getId(), users.toString(), users);
+                        }
+                    } else if (tokens.length == 3) {
+                        String name = tokens[1];
+                        Set<Long> users = parseLongList(tokens[2]);
+                        if (users != null) {
+                            return new ChatCreateMessage(user.getId(), name, users);
                         }
                     }
                     System.out.println("Incorrect operands.");
