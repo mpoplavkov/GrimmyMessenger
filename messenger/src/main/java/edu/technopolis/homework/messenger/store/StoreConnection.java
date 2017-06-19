@@ -1,5 +1,8 @@
 package edu.technopolis.homework.messenger.store;
 
+import edu.technopolis.homework.messenger.config.Config;
+
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -26,15 +29,20 @@ public class StoreConnection {
     }
 
     private static void connect() {
-        String url = "jdbc:postgresql://localhost:5432/messenger";
-        String name = "admin";
-        String pass = "admin";
         try {
-            Class.forName("org.postgresql.Driver");
+            Config config = new Config();
+
+            String url = config.getURL();
+            String name = config.getDbUserName();
+            String pass = config.getDbUserPassword();
+
+            Class.forName(config.getDriverClassName());
             System.out.println("JDBC driver connected");
             connection = DriverManager.getConnection(url, name, pass);
             System.out.println("Store: connection successful");
 
+        } catch (IOException e) {
+            e.printStackTrace();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
