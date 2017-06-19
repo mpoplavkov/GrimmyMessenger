@@ -1,6 +1,11 @@
 package edu.technopolis.homework.messenger.messages;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class LoginMessage extends Message {
 
@@ -18,6 +23,8 @@ public class LoginMessage extends Message {
     public LoginMessage(String login, String password) {
         this(0, login, password);
     }
+
+    public LoginMessage() {}
 
     public String getLogin() {
         return login;
@@ -55,5 +62,19 @@ public class LoginMessage extends Message {
                 "login=" + login + ", " +
                 "password='" + password + '\'' +
                 '}';
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput objectOutput) throws IOException {
+        super.writeExternal(objectOutput);
+        objectOutput.writeInt(password);
+        objectOutput.write(login.getBytes());
+    }
+
+    @Override
+    public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
+        super.readExternal(objectInput);
+        password = objectInput.readInt();
+        login = objectInput.readLine();
     }
 }

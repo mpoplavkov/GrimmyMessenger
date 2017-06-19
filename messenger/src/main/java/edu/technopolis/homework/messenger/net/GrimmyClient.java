@@ -3,7 +3,9 @@ package edu.technopolis.homework.messenger.net;
 import edu.technopolis.homework.messenger.User;
 import edu.technopolis.homework.messenger.messages.*;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -86,6 +88,7 @@ public class GrimmyClient {
                             System.out.println("Client: sending " + message);
                             try {
                                 protocol.encode(message, byteBuffer);
+                                System.out.println("Sending " + byteBuffer.position() + " bytes");
                                 //перед тем как отправлять буфер, его надо перевести в режим чтения!!!
                                 byteBuffer.flip();
                                 socketChannel.write(byteBuffer);

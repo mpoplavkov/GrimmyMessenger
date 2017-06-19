@@ -1,6 +1,10 @@
 package edu.technopolis.homework.messenger.messages;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -11,6 +15,8 @@ public class ChatHistoryResult extends Message {
         super(0, Type.MSG_CHAT_HIST_RESULT);
         this.messages = messages;
     }
+
+    public ChatHistoryResult() {}
 
     public List<TextMessage> getList() {
         return messages;
@@ -49,5 +55,26 @@ public class ChatHistoryResult extends Message {
         stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());
         stringBuilder.append("}");
         return stringBuilder.toString();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput objectOutput) throws IOException {
+        super.writeExternal(objectOutput);
+        objectOutput.writeInt(messages.size());
+        for (TextMessage tm : messages) {
+            tm.writeExternal(objectOutput);
+        }
+    }
+
+    @Override
+    public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
+        super.readExternal(objectInput);
+        int n = objectInput.readInt();
+        messages = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            TextMessage textMessage = new TextMessage();
+            textMessage.readExternal(objectInput);
+            messages.add(textMessage);
+        }
     }
 }

@@ -1,5 +1,8 @@
 package edu.technopolis.homework.messenger.messages;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -21,6 +24,8 @@ public class ChatCreateMessage extends Message {
     public ChatCreateMessage(long senderId, Set<Long> listOfInvited) {
         this(senderId, null, listOfInvited);
     }
+
+    public ChatCreateMessage() {}
 
 
     public Set<Long> getListOfInvited() {
@@ -67,7 +72,7 @@ public class ChatCreateMessage extends Message {
         result.append("}");
         return result.toString();
     }
-/*
+
     @Override
     public void writeExternal(ObjectOutput objectOutput) throws IOException {
         super.writeExternal(objectOutput);
@@ -86,6 +91,6 @@ public class ChatCreateMessage extends Message {
             set.add(objectInput.readLong());
         }
         listOfInvited = set;
+        name = objectInput.readLine();
     }
-*/
 }

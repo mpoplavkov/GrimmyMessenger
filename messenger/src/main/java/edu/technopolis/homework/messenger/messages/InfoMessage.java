@@ -1,5 +1,8 @@
 package edu.technopolis.homework.messenger.messages;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Objects;
 
 public class InfoMessage extends Message {
@@ -17,6 +20,8 @@ public class InfoMessage extends Message {
     public InfoMessage(long senderId) {
         this(senderId, senderId);
     }
+
+    public InfoMessage() {}
 
     public long getUserId() {
         return userId;
@@ -49,5 +54,17 @@ public class InfoMessage extends Message {
                 super.toString() + ", " +
                 "userId='" + userId + '\'' +
                 '}';
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput objectOutput) throws IOException {
+        super.writeExternal(objectOutput);
+        objectOutput.writeLong(userId);
+    }
+
+    @Override
+    public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
+        super.readExternal(objectInput);
+        userId = objectInput.readLong();
     }
 }

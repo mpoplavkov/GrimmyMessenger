@@ -1,5 +1,8 @@
 package edu.technopolis.homework.messenger.messages;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Objects;
 
 public class TextMessage extends Message {
@@ -20,6 +23,8 @@ public class TextMessage extends Message {
         this.chatId = chatId;
         this.text = text;
     }
+
+    public TextMessage() {}
 
     public String getText() {
         return text;
@@ -71,7 +76,7 @@ public class TextMessage extends Message {
         System.out.println(null instanceof String);
     }
 
-/*    @Override
+    @Override
     public void writeExternal(ObjectOutput objectOutput) throws IOException {
         super.writeExternal(objectOutput);
         objectOutput.writeLong(chatId);
@@ -88,5 +93,5 @@ public class TextMessage extends Message {
         byte[] bytes = new byte[n];
         objectInput.read(bytes);
         text = new String(bytes);
-    }*/
+    }
 }

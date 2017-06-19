@@ -11,7 +11,7 @@ import java.util.Objects;
  * Поскольку с механизмом Externalizable есть вопросы, здесь пока что будет Serializable.
  *
  */
-public abstract class Message implements Serializable {
+public abstract class Message implements Externalizable {
 
     private long id;
     private long senderId;
@@ -27,6 +27,8 @@ public abstract class Message implements Serializable {
     protected Message(long senderId, Type type) {
         this(idCounter++, senderId, type);
     }
+
+    public Message() {}
 
     public long getId() {
         return id;
@@ -62,32 +64,17 @@ public abstract class Message implements Serializable {
                 "senderId='" + senderId + "'";
     }
 
-    /*
-
-    public void setSenderId(long senderId) {
-        this.senderId = senderId;
-    }
-*/
-
-    /*
-
-
-    public void setType(Type type) {
-        this.type = type;
-    }
-    */
-
-    /*@Override
+    @Override
     public void writeExternal(ObjectOutput objectOutput) throws IOException {
         objectOutput.writeLong(id);
         objectOutput.writeLong(senderId);
-        //objectOutput.writeByte(type.ordinal());
+        objectOutput.writeByte(type.ordinal());
     }
 
     @Override
     public void readExternal(ObjectInput objectInput) throws IOException, ClassNotFoundException {
         id = objectInput.readLong();
         senderId = objectInput.readLong();
-        //type = Type.values()[objectInput.readByte()];
-    }*/
+        type = Type.values()[objectInput.readByte()];
+    }
 }

@@ -79,6 +79,7 @@ public class GrimmyServer {
         try {
             ByteBuffer buffer = map.get(channel);
             int read = channel.read(buffer);
+            System.out.println("Received " + buffer.position() + " bytes");
             if (read == -1) {
                 close(channel);
             } else if (read > 0) {
@@ -119,7 +120,7 @@ public class GrimmyServer {
                     TextMessage textMessage = (TextMessage) message;
                     messageStore.addMessage(textMessage);
 
-                    info = "Sent message to user№" + textMessage.getSenderId() + ": " +
+                    info = "Sent message to chat " + textMessage.getChatId() + ": " +
                             (textMessage.getText().length() > 20 ?
                                     (textMessage.getText().substring(0, 20) + "...")
                                     : textMessage.getText());
