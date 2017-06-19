@@ -130,6 +130,11 @@ public class GrimmyServer {
                     user = userStore.getUser(loginMessage.getLogin(), loginMessage.getPassword());
                     info = "id=" + user.getId() + " login=" + user.getLogin();
                     return new StatusMessage(true, info);
+                case MSG_USER_CREATE:
+                    UserCreateMessage userCreateMessage = (UserCreateMessage) message;
+                    user = userStore.addUser(userCreateMessage.getLogin(), userCreateMessage.getPassword());
+                    info = "id=" + user.getId() + " login=" + user.getLogin();
+                    return new StatusMessage(true, info);
                 case MSG_CHAT_CREATE:
                     ChatCreateMessage chatCreateMessage = (ChatCreateMessage) message;
                     //Можно это будет потом заменить на хранимую процедуру в БД, чтоб

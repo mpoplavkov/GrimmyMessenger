@@ -9,7 +9,7 @@ public interface UserStore {
      * Добавить пользователя в хранилище
      * Вернуть его же
      */
-    User addUser(User user) throws SQLException;
+    User addUser(String login, int password) throws SQLException;
 
     /**
      * Обновить информацию о пользователе

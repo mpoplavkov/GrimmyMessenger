@@ -172,8 +172,21 @@ public class GrimmyClient {
                         "/info [userId]                         - получить информацию о себе (если id не указан) или о пользователе с id = userId.\n" +
                         "/chat_list                             - получить список чатов пользователя.\n" +
                         "/chat_create [name] <userId list>      - создать чат или вернуть существующий, если указан один userId. <userId list> - <userId,userId,userId...>\n" +
-                        "/chat_history <chat_id>                - получить список сообщений из указанного чата.");
+                        "/chat_history <chat_id>                - получить список сообщений из указанного чата." +
+                        "/user_create login password            - зарегистрировать нового пользователя.");
                 return null;
+
+            case "/user_create":
+                if (tokens.length == 3) {
+                    if (user != null) {
+                        System.out.println("You're already logged in");
+                        return null;
+                    } else {
+                        return new UserCreateMessage(tokens[1], tokens[2]);
+                    }
+                }
+                System.out.println("Incorrect operands.");
+                break;
             case "/text":
                 if (user != null) {
                     if (tokens.length > 2) {

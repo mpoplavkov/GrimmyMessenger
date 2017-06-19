@@ -13,10 +13,10 @@ public class UserTable implements UserStore {
     private static final String UPDATE_USER_QUERY = "UPDATE users SET (login, password) = (?, ?) WHERE id = ? RETURNING *";
 
     @Override
-    public User addUser(User user) throws SQLException {
+    public User addUser(String login, int password) throws SQLException {
         PreparedStatement preparedStatement = StoreConnection.getConnection().prepareStatement(ADD_USER_QUERY);
-        preparedStatement.setString(1, user.getLogin());
-        //preparedStatement.setInt(2, user.getPassword());
+        preparedStatement.setString(1, login);
+        preparedStatement.setInt(2, password);
         ResultSet resultSet = preparedStatement.executeQuery();
         return ejectUser(resultSet);
     }

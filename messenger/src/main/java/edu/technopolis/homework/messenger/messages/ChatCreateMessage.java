@@ -80,6 +80,7 @@ public class ChatCreateMessage extends Message {
         for (Long l : listOfInvited) {
             objectOutput.writeLong(l);
         }
+        objectOutput.writeBytes(name);
     }
 
     @Override
